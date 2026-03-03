@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Revisión de Validación Grupal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --surface2: #F8FAFB;
+  --border: #E2E6ED;
+  --border2: #D0D5DD;
+  --text: #0F1726;
+  --text2: #475467;
+  --text3: #8C95A6;
+  --green: #16864E;
+  --green2: #12B76A;
+  --green-bg: #ECFDF3;
+  --green-border: #A6F4C5;
+  --amber: #B54708;
+  --amber2: #F79009;
+  --amber-bg: #FFFAEB;
+  --amber-border: #FEDF89;
+  --red: #B42318;
+  --red2: #F04438;
+  --red-bg: #FEF3F2;
+  --red-border: #FECDCA;
+  --blue: #1570EF;
+  --blue-bg: #EFF8FF;
+  --blue-border: #B2DDFF;
+  --r: 14px;
+  --r-sm: 10px;
+  --r-xs: 6px;
+  --shadow: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
+  --shadow-lg: 0 4px 12px rgba(16,24,40,0.08), 0 1px 4px rgba(16,24,40,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════
+   PANTALLA DE BÚSQUEDA
+═══════════════════════════════════════ */
+#screen-search {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: linear-gradient(180deg, #fff 0%, #F4F6F9 100%);
+}
+
+.search-icon-box {
+  width: 64px; height: 64px;
+  background: linear-gradient(140deg, #1A7A45 0%, #2DB76A 100%);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 20px rgba(26,122,69,0.25);
+}
+.search-icon-box svg { width: 32px; height: 32px; }
+
+.search-title {
+  font-size: 24px; font-weight: 800; color: var(--text);
+  text-align: center; line-height: 1.15; margin-bottom: 10px;
+}
+.search-subtitle {
+  font-size: 14px; color: var(--text3); text-align: center;
+  max-width: 300px; line-height: 1.5; margin-bottom: 24px;
+}
+
+.search-chips {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px;
+}
+.search-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--surface2); border: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--text2);
+}
+.search-chip-icon { font-size: 14px; }
+
+.search-form {
+  width: 100%; max-width: 400px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.search-input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0 16px;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input-wrap:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(22,134,78,0.1);
+}
+.search-input-wrap svg { flex-shrink: 0; color: var(--text3); }
+.search-input {
+  width: 100%; padding: 14px 0;
+  border: none; outline: none;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+  text-transform: uppercase; letter-spacing: 0.3px; background: transparent;
+}
+.search-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--text3); }
+
+.search-btn {
+  width: 100%; padding: 15px;
+  background: var(--green); color: #fff; border: none;
+  border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+}
+.search-btn:hover { background: #126E40; }
+.search-btn:active { transform: scale(0.98); }
+.search-btn:disabled { background: var(--text3); cursor: not-allowed; }
+
+.search-msg {
+  font-size: 13px; text-align: center; margin-top: 4px; display: none;
+}
+.search-msg.error { color: var(--red); }
+.search-msg.loading { color: var(--text3); }
+.search-msg.show { display: block; }
+
+/* ═══════════════════════════════════════
+   PANTALLA EXPEDIENTE
+═══════════════════════════════════════ */
+#screen-expediente { display: none; padding-bottom: 90px; }
+
+.exp-app { max-width: 520px; margin: 0 auto; padding: 0; }
+
+/* Top bar */
+.exp-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: #fff; position: sticky; top: 0; z-index: 50;
+}
+.exp-back {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  background: none; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.exp-back:hover { color: var(--text2); }
+.exp-topbar-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+.exp-topbar-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: 20px; letter-spacing: 0.5px;
+}
+.badge-solo-lectura { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+/* ── SCORE RING HEADER ── */
+.score-hero {
+  padding: 28px 20px 24px;
+  background: linear-gradient(165deg, #0F2B1A 0%, #164A2E 50%, #1A6B3A 100%);
+  position: relative; overflow: hidden;
+}
+.score-hero::before {
+  content: ''; position: absolute; top: -60px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.score-hero::after {
+  content: ''; position: absolute; bottom: -80px; left: 20px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.score-hero-top {
+  display: flex; align-items: flex-start; justify-content: space-between; position: relative; z-index: 1;
+}
+.score-hero-left { flex: 1; }
+.score-hero-label {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;
+}
+.score-hero-grupo {
+  font-size: 26px; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 4px;
+}
+.score-hero-meta {
+  font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 16px;
+}
+
+/* Ring SVG */
+.score-ring-wrap {
+  width: 100px; height: 100px; flex-shrink: 0; position: relative;
+}
+.score-ring-svg { transform: rotate(-90deg); }
+.score-ring-bg { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 8; }
+.score-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+.score-ring-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.score-ring-num {
+  font-size: 28px; font-weight: 800; color: #fff; line-height: 1;
+  font-family: 'DM Mono', monospace;
+}
+.score-ring-label { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-top: 2px; }
+
+/* Veredicto strip */
+.veredicto-strip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--r-sm);
+  margin-top: 16px; position: relative; z-index: 1;
+}
+.veredicto-strip.aprobar   { background: rgba(18,183,106,0.15); border: 1px solid rgba(18,183,106,0.3); }
+.veredicto-strip.rechazar  { background: rgba(240,68,56,0.15); border: 1px solid rgba(240,68,56,0.3); }
+.veredicto-strip.pendiente { background: rgba(247,144,9,0.15); border: 1px solid rgba(247,144,9,0.3); }
+.veredicto-icon { font-size: 20px; }
+.veredicto-text { font-size: 14px; font-weight: 700; color: #fff; }
+.veredicto-sub  { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+/* Grado badges row */
+.grado-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; position: relative; z-index: 1;
+}
+.grado-pill {
+  padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  font-family: 'DM Mono', monospace;
+}
+.pill-A { background: rgba(39,174,96,0.9); color: #fff; }
+.pill-B { background: rgba(138,122,46,0.9); color: #fff; }
+.pill-C { background: rgba(180,83,9,0.9);  color: #fff; }
+.pill-D { background: rgba(127,29,29,0.9); color: #fff; }
+
+/* ── CONTENT AREA ── */
+.exp-content { padding: 16px; }
+
+/* Section card */
+.sec-card {
+  background: var(--surface); border-radius: var(--r);
+  border: 1px solid var(--border); margin-bottom: 12px;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.sec-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; cursor: pointer; user-select: none;
+  transition: background 0.15s;
+}
+.sec-header:hover { background: var(--surface2); }
+.sec-header-left { display: flex; align-items: center; gap: 12px; }
+.sec-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.sec-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.sec-sub   { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.sec-badge {
+  font-size: 12px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.sec-chev { font-size: 12px; color: var(--text3); transition: transform 0.2s; margin-left: 6px; }
+.sec-chev.open { transform: rotate(180deg); }
+.sec-body { display: none; border-top: 1px solid var(--border); }
+.sec-body.open { display: block; }
+
+/* Dimension checklist */
+.dim-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 18px; border-bottom: 1px solid var(--bg);
+  font-size: 14px; font-weight: 500; color: var(--text);
+}
+.dim-row:last-child { border-bottom: none; }
+.dim-icon { font-size: 16px; flex-shrink: 0; }
+
+/* Visita data */
+.visita-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 18px; border-bottom: 1px solid var(--bg); font-size: 14px;
+}
+.visita-row:last-child { border-bottom: none; }
+.visita-label { color: var(--text2); }
+.visita-val   { font-weight: 600; font-family: 'DM Mono', monospace; }
+.visita-val.green  { color: var(--green); }
+.visita-val.amber  { color: var(--amber); }
+.visita-val.red    { color: var(--red); }
+
+/* Observaciones */
+.obs-card {
+  margin: 0 18px 14px; padding: 14px;
+  background: var(--amber-bg); border: 1px solid var(--amber-border);
+  border-radius: var(--r-sm); font-size: 13px; color: var(--amber);
+}
+.obs-card.ok {
+  background: var(--green-bg); border-color: var(--green-border); color: var(--green);
+}
+.obs-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 6px; opacity: 0.7;
+}
+
+/* ── INTEGRANTE CARDS ── */
+.filter-row {
+  display: flex; gap: 6px; padding: 12px 18px; overflow-x: auto;
+  border-bottom: 1px solid var(--border); scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.ftab {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text2); transition: all 0.15s;
+}
+.ftab.active { background: var(--text); color: #fff; border-color: var(--text); }
+.ftab.A.active { background: #166534; border-color: #166534; }
+.ftab.B.active { background: #854D0E; border-color: #854D0E; }
+.ftab.C.active { background: #9A3412; border-color: #9A3412; }
+.ftab.D.active { background: #7F1D1D; border-color: #7F1D1D; }
+
+.int-card { border-bottom: 1px solid var(--border); }
+.int-card:last-child { border-bottom: none; }
+.int-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 14px 18px;
+}
+.int-left { flex: 1; }
+.int-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; line-height: 1.2; }
+.int-meta { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+.int-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+.tag-red    { background: #FEE2E2; color: #991B1B; }
+.tag-amber  { background: #FEF3C7; color: #92400E; }
+.tag-green  { background: #DCFCE7; color: #166534; }
+.tag-blue   { background: #DBEAFE; color: #1E40AF; }
+.tag-gray   { background: #F3F4F6; color: #4B5563; }
+
+.int-score { text-align: right; flex-shrink: 0; margin-left: 12px; }
+.int-score-num { font-size: 26px; font-weight: 800; font-family: 'DM Mono', monospace; line-height: 1; }
+.int-score-cal { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.5px; margin-top: 2px; }
+.sc-A { color: #166534; } .sc-B { color: #92400E; } .sc-C { color: #C2410C; } .sc-D { color: #B91C1C; }
+
+.int-toggle {
+  font-size: 12px; color: var(--blue); font-weight: 600; cursor: pointer;
+  padding: 0 18px 12px; display: flex; align-items: center; gap: 6px; user-select: none;
+}
+
+.int-expand { display: none; border-top: 1px solid var(--border); background: var(--surface2); }
+.int-expand.open { display: block; }
+
+/* Tabs inside expand */
+.int-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.int-tab {
+  flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700;
+  color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s; letter-spacing: 0.3px;
+}
+.int-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.int-panel { display: none; padding: 14px 18px; }
+.int-panel.active { display: block; }
+
+/* Capa rows */
+.capa-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.capa-row:last-child { border-bottom: none; }
+.capa-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.dot-red    { background: var(--red2); }
+.dot-green  { background: var(--green2); }
+.dot-amber  { background: var(--amber2); }
+.capa-lbl   { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+.capa-val   { font-size: 13px; font-weight: 600; color: var(--text); }
+.capa-val.red   { color: var(--red); }
+.capa-val.green { color: var(--green); }
+
+.detail-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-lbl { color: var(--text2); }
+.detail-val { font-weight: 600; font-family: 'DM Mono', monospace; }
+
+.cdc-block { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cdc-block:last-child { border-bottom: none; }
+.cdc-block-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.cdc-block-info  { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.cdc-block-status { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.cdc-block-status.bad  { color: var(--red); }
+.cdc-block-status.good { color: var(--green); }
+
+.cons-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 12px; margin-top: 10px;
+  font-size: 13px; display: flex; justify-content: space-between; align-items: center;
+}
+.cons-val { font-weight: 800; font-family: 'DM Mono', monospace; font-size: 16px; }
+.cons-val.high { color: var(--red); }
+.cons-val.ok   { color: var(--green); }
+
+/* ── CAPACIDAD PAGO ── */
+.cp-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 18px; border-bottom: 1px solid var(--bg); font-size: 14px;
+}
+.cp-row:last-child { border-bottom: none; }
+.cp-label { color: var(--text2); }
+.cp-value { font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.cp-value.green  { color: var(--green); }
+.cp-value.amber  { color: var(--amber); }
+.cp-value.red    { color: var(--red); }
+
+/* ── ALERTA ITEMS ── */
+.al-item { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.al-item:last-child { border-bottom: none; }
+.al-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.al-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.al-count { font-size: 12px; font-weight: 600; color: var(--text3); font-family: 'DM Mono', monospace; }
+.al-desc  { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.al-ok    { font-size: 13px; color: var(--green); display: flex; align-items: center; gap: 6px; font-weight: 500; }
+.al-table { width: 100%; font-size: 12px; margin-top: 8px; border-collapse: collapse; }
+.al-table th { text-align: left; color: var(--text3); font-weight: 500; padding: 4px 0; border-bottom: 1px solid var(--border); }
+.al-table td { padding: 5px 0; color: var(--text2); border-bottom: 1px solid var(--bg); vertical-align: top; }
+.al-table td:last-child { text-align: right; font-family: 'DM Mono', monospace; font-weight: 500; }
+
+/* ═══════════════════════════════════════
+   BOTTOM ACTION BAR
+═══════════════════════════════════════ */
+.action-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  padding: 12px 16px; z-index: 60;
+  display: none;
+}
+.action-bar.visible { display: block; }
+.action-bar-inner {
+  max-width: 520px; margin: 0 auto;
+  display: flex; gap: 10px;
+}
+.act-btn {
+  flex: 1; padding: 14px 10px; border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s; border: none;
+}
+.act-btn:active { transform: scale(0.97); }
+.act-revision {
+  background: var(--amber-bg); color: var(--amber); border: 1.5px solid var(--amber-border);
+}
+.act-revision:hover { background: #FFF0D4; }
+.act-aprobar {
+  background: var(--green); color: #fff;
+}
+.act-aprobar:hover { background: #126E40; }
+
+/* ═══════════════════════════════════════
+   MODALS
+═══════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,38,0.55);
+  z-index: 200; display: none;
+  align-items: flex-end; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.show { display: flex; }
+
+.modal-sheet {
+  background: #fff; border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 520px;
+  padding: 20px 24px 32px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(80px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+
+.modal-icon { font-size: 48px; text-align: center; margin-bottom: 12px; }
+.modal-title { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+.modal-sub {
+  font-size: 14px; color: var(--text2); text-align: center;
+  margin-bottom: 20px; line-height: 1.5;
+}
+.modal-group {
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  text-align: center; letter-spacing: 0.5px; margin-bottom: 16px;
+}
+
+.modal-ta-wrap { margin-bottom: 20px; }
+.modal-ta-label {
+  font-size: 12px; font-weight: 700; color: var(--text2);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
+}
+.modal-ta-label .req { color: var(--red); }
+.modal-ta {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+  padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--text); background: var(--surface2); resize: none;
+  outline: none; min-height: 100px; transition: all 0.15s;
+}
+.modal-ta:focus { border-color: var(--green); background: #fff; }
+.modal-ta::placeholder { color: var(--text3); }
+.modal-ta-error {
+  font-size: 12px; color: var(--red); margin-top: 4px; display: none;
+}
+.modal-ta-error.show { display: block; }
+
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn-cancel {
+  flex: 0 0 auto; padding: 14px 22px; border-radius: var(--r-sm);
+  border: 1.5px solid var(--border2); background: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  color: var(--text2); cursor: pointer;
+}
+.modal-btn-confirm {
+  flex: 1; padding: 14px; border-radius: var(--r-sm); border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  color: #fff; cursor: pointer; transition: background 0.15s;
+}
+.modal-btn-confirm.green { background: var(--green); }
+.modal-btn-confirm.green:hover { background: #126E40; }
+.modal-btn-confirm.amber { background: var(--amber); }
+.modal-btn-confirm.amber:hover { background: #944006; }
+
+/* ═══════════════════════════════════════
+   SUCCESS SCREEN
+═══════════════════════════════════════ */
+#screen-success {
+  display: none; min-height: 100vh;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 32px; text-align: center;
+  background: linear-gradient(180deg, #fff 0%, #F4F6F9 100%);
+}
+#screen-success.show { display: flex; }
+.success-icon { font-size: 72px; margin-bottom: 20px; }
+.success-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.success-sub { font-size: 15px; color: var(--text2); max-width: 300px; margin: 0 auto 12px; line-height: 1.5; }
+.success-detail {
+  font-size: 13px; color: var(--text3); margin-bottom: 28px;
+  font-family: 'DM Mono', monospace;
+}
+.success-btn {
+  padding: 14px 32px; border-radius: var(--r-sm); border: none;
+  background: var(--green); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.success-btn:hover { background: #126E40; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  background: #1C1C1E; color: #fff; padding: 10px 20px;
+  border-radius: 20px; font-size: 13px; font-weight: 500;
+  z-index: 300; opacity: 0; transition: opacity 0.2s; white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     PANTALLA 1: BÚSQUEDA
+═══════════════════════════════ -->
+<div id="screen-search">
+  <div class="search-icon-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  </div>
+  <div class="search-title">Revisión de Validación Grupal</div>
+  <div class="search-subtitle">Consulta el expediente completo de un grupo evaluado para revisar su validación y tomar una decisión.</div>
+
+  <div class="search-chips">
+    <div class="search-chip"><span class="search-chip-icon">📄</span> Solo lectura</div>
+    <div class="search-chip"><span class="search-chip-icon">🔒</span> Datos validados</div>
+    <div class="search-chip"><span class="search-chip-icon">☑️</span> Toma de decisión</div>
+  </div>
+
+  <div class="search-form">
+    <div class="search-input-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <input type="text" id="input-grupo" class="search-input" placeholder="Nombre del grupo (ej. LAS PODEROSAS)" autocomplete="off" autocorrect="off" autocapitalize="characters" />
+    </div>
+    <button class="search-btn" id="btn-buscar" onclick="buscarGrupo()">Consultar expediente</button>
+    <div class="search-msg error" id="msg-error">Grupo no encontrado. Verifica el nombre e intenta de nuevo.</div>
+    <div class="search-msg loading" id="msg-loading">Consultando expediente… un momento</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     PANTALLA 2: EXPEDIENTE
+═══════════════════════════════ -->
+<div id="screen-expediente">
+  <div class="exp-topbar">
+    <button class="exp-back" onclick="volverBusqueda()">← Buscar otro</button>
+    <div class="exp-topbar-title">
+      Expediente
+      <span class="exp-topbar-badge badge-solo-lectura">SOLO LECTURA</span>
+    </div>
+  </div>
+
+  <div class="exp-app">
+    <!-- SCORE HERO -->
+    <div class="score-hero">
+      <div class="score-hero-top">
+        <div class="score-hero-left">
+          <div class="score-hero-label">Expediente del grupo</div>
+          <div class="score-hero-grupo" id="exp-nombre">—</div>
+          <div class="score-hero-meta" id="exp-meta">— integrantes</div>
+        </div>
+        <div class="score-ring-wrap">
+          <svg class="score-ring-svg" viewBox="0 0 100 100" width="100" height="100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-fill" id="ring-fill" cx="50" cy="50" r="42"
+              stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+          </svg>
+          <div class="score-ring-text">
+            <div class="score-ring-num" id="ring-num">—</div>
+            <div class="score-ring-label">SCORE</div>
+          </div>
+        </div>
+      </div>
+      <div class="veredicto-strip pendiente" id="veredicto-strip">
+        <div class="veredicto-icon" id="veredicto-icon">⏳</div>
+        <div>
+          <div class="veredicto-text" id="veredicto-text">Pendiente de revisión</div>
+          <div class="veredicto-sub" id="veredicto-sub">Requiere acción del CS</div>
+        </div>
+      </div>
+      <div class="grado-row" id="grado-row"></div>
+    </div>
+
+    <div class="exp-content">
+
+      <!-- VISITA ÚNICA -->
+      <div class="sec-card">
+        <div class="sec-header" onclick="toggleSec('visita')">
+          <div class="sec-header-left">
+            <div class="sec-icon" style="background:#FEF9C3">📋</div>
+            <div><div class="sec-title">Resultado Visita Única</div><div class="sec-sub">Evaluación del CE en campo</div></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span class="sec-badge" id="badge-visita" style="background:#FEF9C3;color:#854D0E">—</span>
+            <span class="sec-chev" id="chev-visita">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="body-visita">
+          <div id="visita-content" style="padding:20px;color:var(--text3);text-align:center;font-size:13px;">Cargando…</div>
+        </div>
+      </div>
+
+      <!-- ALERTAS GRUPALES -->
+      <div class="sec-card">
+        <div class="sec-header" onclick="toggleSec('alertas')">
+          <div class="sec-header-left">
+            <div class="sec-icon" style="background:#FEE2E2">⚠️</div>
+            <div><div class="sec-title">Alertas Grupales</div><div class="sec-sub">Señales de riesgo detectadas</div></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span class="sec-badge" id="badge-alertas" style="background:#FEE2E2;color:#B91C1C">—</span>
+            <span class="sec-chev" id="chev-alertas">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="body-alertas">
+          <div id="alertas-content"></div>
+        </div>
+      </div>
+
+      <!-- CAPACIDAD DE PAGO -->
+      <div class="sec-card">
+        <div class="sec-header" onclick="toggleSec('pago')">
+          <div class="sec-header-left">
+            <div class="sec-icon" style="background:#DCFCE7">💰</div>
+            <div><div class="sec-title">Capacidad de Pago</div><div class="sec-sub">Solvencia grupal consolidada</div></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span class="sec-badge" id="badge-pago" style="background:#DCFCE7;color:#166534">—</span>
+            <span class="sec-chev" id="chev-pago">▼</span>
+          </div>
+        </div>
+        <div class="sec-body" id="body-pago"><div id="pago-content"></div></div>
+      </div>
+
+      <!-- DETALLE POR INTEGRANTE -->
+      <div class="sec-card">
+        <div class="sec-header" onclick="toggleSec('detalle')">
+          <div class="sec-header-left">
+            <div class="sec-icon" style="background:#DBEAFE">👥</div>
+            <div><div class="sec-title">Detalle por Integrante</div><div class="sec-sub" id="detalle-sub">— integrantes · Score IPP + CDC</div></div>
+          </div>
+          <div style="display:flex;align-items:center">
+            <span class="sec-badge" id="badge-detalle" style="background:#FEE2E2;color:#B91C1C">—</span>
+            <span class="sec-chev open" id="chev-detalle">▼</span>
+          </div>
+        </div>
+        <div class="sec-body open" id="body-detalle"><div id="detalle-content"></div></div>
+      </div>
+
+    </div><!-- /exp-content -->
+  </div><!-- /exp-app -->
+</div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="action-bar" id="action-bar">
+  <div class="action-bar-inner">
+    <button class="act-btn act-revision" onclick="openModal('revision')">⚑ Solicitar revisión</button>
+    <button class="act-btn act-aprobar" onclick="openModal('aprobar')">✓ Aprobar grupo</button>
+  </div>
+</div>
+
+<!-- MODAL: SOLICITAR REVISIÓN -->
+<div class="modal-overlay" id="modal-revision">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-icon">⚑</div>
+    <div class="modal-title" style="color:var(--amber)">Solicitar revisión</div>
+    <div class="modal-sub">Enviarás este expediente de vuelta al equipo para que revise los puntos que señales.</div>
+    <div class="modal-group" id="modal-rev-grupo"></div>
+    <div class="modal-ta-wrap">
+      <div class="modal-ta-label">Comentarios <span class="req">*</span></div>
+      <textarea class="modal-ta" id="ta-revision" placeholder="Describe qué puntos necesitan revisión…"></textarea>
+      <div class="modal-ta-error" id="err-revision">Los comentarios son obligatorios para solicitar revisión.</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-cancel" onclick="closeModal('revision')">Cancelar</button>
+      <button class="modal-btn-confirm amber" onclick="confirmar('revision')">Solicitar revisión</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: APROBAR GRUPO -->
+<div class="modal-overlay" id="modal-aprobar">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-icon">✅</div>
+    <div class="modal-title" style="color:var(--green)">Aprobar grupo</div>
+    <div class="modal-sub">Confirmarás la aprobación de este grupo. Esta acción quedará registrada.</div>
+    <div class="modal-group" id="modal-apr-grupo"></div>
+    <div class="modal-ta-wrap">
+      <div class="modal-ta-label">Comentarios <span class="req">*</span></div>
+      <textarea class="modal-ta" id="ta-aprobar" placeholder="Observaciones o condiciones de aprobación…"></textarea>
+      <div class="modal-ta-error" id="err-aprobar">Los comentarios son obligatorios para aprobar.</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn-cancel" onclick="closeModal('aprobar')">Cancelar</button>
+      <button class="modal-btn-confirm green" onclick="confirmar('aprobar')">Confirmar aprobación</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div id="screen-success">
+  <div class="success-icon" id="success-icon">✅</div>
+  <div class="success-title" id="success-title">Grupo aprobado</div>
+  <div class="success-sub" id="success-sub">La decisión ha sido registrada correctamente.</div>
+  <div class="success-detail" id="success-detail"></div>
+  <button class="success-btn" onclick="volverInicio()">Consultar otro expediente</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════
+const SHEET_ID  = '1kC89wVcE-6G96Y6WCEDjElAdLWbKwL_SaqHQDR8I7iY';
+const GID_PROSPECTOS    = '1077826375';
+const APPS_SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbzbodgk8AirsoBDXwo6PzpPzhM3-8B-zoEcUV3Alzw443ZBT1laKkM56kCfrGq6Iu4/exec';
+
+// Column map (auto-detected from headers)
+const COL = {};
+let grupoActivo = null;
+let datosGrupo  = [];
+let visitaData  = null;
+
+// ═══════════════════════════════════════════
+// FETCH GOOGLE SHEETS (JSONP)
+// ═══════════════════════════════════════════
+let _fetchId = 0;
+function fetchGviz(gid, sheetName) {
+  return new Promise((resolve, reject) => {
+    const id = ++_fetchId;
+    if (!window.google) window.google = {};
+    if (!window.google.visualization) window.google.visualization = {};
+    if (!window.google.visualization.Query) window.google.visualization.Query = {};
+
+    window.google.visualization.Query.setResponse = function(data) {
+      clearTimeout(timer);
+      const s = document.getElementById('_gs_' + id);
+      if (s) s.remove();
+      if (data.status === 'error') { reject(new Error('Sheet error')); return; }
+      try { resolve(data); } catch(e) { reject(e); }
+    };
+
+    let url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    if (gid) url += `&gid=${gid}`;
+    else if (sheetName) url += `&sheet=${encodeURIComponent(sheetName)}`;
+
+    const script = document.createElement('script');
+    script.id  = '_gs_' + id;
+    script.src = url;
+    script.onerror = () => { clearTimeout(timer); reject(new Error('Network error')); };
+    document.head.appendChild(script);
+
+    const timer = setTimeout(() => {
+      const s = document.getElementById('_gs_' + id);
+      if (s) s.remove();
+      reject(new Error('Timeout'));
+    }, 15000);
+  });
+}
+
+function parseRows(data) {
+  const headers = data.table.cols.map(c => (c.label || c.id || '').trim());
+  const cols = headers.length;
+  const rows = data.table.rows.map(row =>
+    Array.from({length: cols}, (_, i) => {
+      const cell = row.c && row.c[i];
+      if (!cell || cell.v === null || cell.v === undefined) return '';
+      if (typeof cell.v === 'string' && cell.v.startsWith('Date(')) return cell.f || cell.v;
+      return String(cell.v);
+    })
+  );
+  return { headers, rows };
+}
+
+function buildColMap(headers) {
+  const map = {};
+  headers.forEach((h, i) => { map[h.toLowerCase().trim()] = i; });
+  const f = (...names) => { for (const n of names) { if (map[n] !== undefined) return map[n]; } return -1; };
+
+  COL.nombre           = f('nombre');
+  COL.ap_paterno       = f('apellido_paterno');
+  COL.ap_materno       = f('apellido_materno');
+  COL.ingresos         = f('ingresos_semanales');
+  COL.gastos           = f('gastos_semanales');
+  COL.capacidad        = f('capacidad_pago');
+  COL.exp_grupal       = f('experiencia_grupal');
+  COL.otros_creditos   = f('otros_creditos');
+  COL.monto_solicitado = f('monto_solicitado');
+  COL.ipp_score        = f('ipp_score');
+  COL.ipp_grado        = f('ipp_grado');
+  COL.flujo_neto       = f('flujo_neto');
+  COL.cdc_total_cuentas= f('cdc_total_cuentas');
+  COL.cdc_cuentas_corr = f('cdc_cuentas_corriente');
+  COL.cdc_cuentas_atr  = f('cdc_cuentas_atraso');
+  COL.cdc_saldo_total  = f('cdc_saldo_total');
+  COL.cdc_saldo_vencido= f('cdc_saldo_vencido_total');
+  COL.cdc_max_atraso   = f('cdc_max_peor_atraso');
+  COL.cdc_flags        = f('cdc_flags_prevencion');
+  COL.cdc_tiene_fd     = f('cdc_tiene_fd');
+  COL.cdc_tiene_sg     = f('cdc_tiene_sg');
+  COL.cdc_tiene_im     = f('cdc_tiene_im');
+  COL.cdc_tiene_up     = f('cdc_tiene_up');
+  COL.cdc_tiene_pc     = f('cdc_tiene_pc');
+  COL.cdc_tiene_lo     = f('cdc_tiene_lo');
+  COL.cdc_capa_b       = f('cdc_cuentas_capa_b');
+  COL.cdc_excluidas    = f('cdc_cuentas_excluidas');
+  COL.cdc_capa         = f('cdc_capa_activada');
+  COL.cdc_reglas       = f('cdc_reglas_activadas');
+  COL.cdc_grado_pre    = f('cdc_grado_pre_buro');
+  COL.cdc_grado_final  = f('cdc_grado_final');
+  COL.cdc_score_post   = f('cdc_score_post_buro');
+  COL.cdc_recomend     = f('cdc_recomendacion');
+  COL.grupo_final      = f('nombre del grupo final');
+  COL.ine_coincide     = f('coincidencia_ine');
+  COL.ant_domicilio    = f('antiguedad_domicilio');
+  COL.tipo_domicilio   = f('tipo_domicilio');
+  COL.ant_negocio      = f('antiguedad_negocio');
+  COL.ubicacion_neg    = f('ubicacion_negocio');
+  COL.cdc_total_cons   = f('cdc_total_consultas_12m');
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+const v   = (r, k) => (r[COL[k]] || '').toString().trim();
+const num = (r, k) => parseFloat(v(r, k)) || 0;
+const fmt = n => '$' + Number(n).toLocaleString('es-MX');
+
+function fullName(r) {
+  return [v(r,'nombre'), v(r,'ap_paterno'), v(r,'ap_materno')]
+    .filter(Boolean).join(' ').toUpperCase();
+}
+
+function toTitle(s) { return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()); }
+
+function gradoColor(g) { return {A:'sc-A',B:'sc-B',C:'sc-C',D:'sc-D'}[g]||''; }
+function pillClass(g) { return {A:'pill-A',B:'pill-B',C:'pill-C',D:'pill-D'}[g]||''; }
+
+function tagFromRec(r) {
+  const rec = v(r, 'cdc_recomend');
+  if (rec.includes('RECHAZAR')) return '<span class="tag tag-red">🚫 Rechazar</span>';
+  if (rec.includes('APROBAR'))  return '<span class="tag tag-green">✓ Aprobar</span>';
+  return '<span class="tag tag-amber">⚠ Revisar</span>';
+}
+
+// ═══════════════════════════════════════════
+// BÚSQUEDA
+// ═══════════════════════════════════════════
+async function buscarGrupo() {
+  const query = document.getElementById('input-grupo').value.trim().toUpperCase();
+  if (!query) return;
+
+  const btn = document.getElementById('btn-buscar');
+  const err = document.getElementById('msg-error');
+  const ldr = document.getElementById('msg-loading');
+
+  btn.disabled = true;
+  err.classList.remove('show');
+  ldr.classList.add('show');
+
+  try {
+    // Fetch prospectos
+    const data1 = await fetchGviz(GID_PROSPECTOS);
+    const { headers, rows } = parseRows(data1);
+    buildColMap(headers);
+
+    const integrantes = rows.filter(r => {
+      const g = (r[COL.grupo_final] || '').trim().toUpperCase();
+      return g === query;
+    });
+
+    if (integrantes.length === 0) {
+      err.textContent = 'Grupo no encontrado. Verifica el nombre e intenta de nuevo.';
+      err.classList.add('show');
+      return;
+    }
+
+    grupoActivo = query;
+    datosGrupo  = integrantes;
+
+    // Fetch visita única (best effort)
+    try {
+      const data2 = await fetchGviz(null, 'Visita_Unica');
+      const vu = parseRows(data2);
+      const vuHeaders = vu.headers.map(h => h.toLowerCase().trim());
+      const colGrupo  = vuHeaders.indexOf('grupo');
+      const matched   = vu.rows.filter(r => (r[colGrupo]||'').trim().toUpperCase() === query);
+      if (matched.length > 0) {
+        const last = matched[matched.length - 1]; // latest
+        visitaData = {};
+        vuHeaders.forEach((h, i) => { visitaData[h] = last[i] || ''; });
+      } else {
+        visitaData = null;
+      }
+    } catch(e) {
+      visitaData = null;
+    }
+
+    renderExpediente();
+    document.getElementById('screen-search').style.display = 'none';
+    document.getElementById('screen-expediente').style.display = 'block';
+    document.getElementById('action-bar').classList.add('visible');
+    window.scrollTo(0, 0);
+
+  } catch (e) {
+    err.textContent = 'Error al conectar con el servidor. Verifica tu conexión.';
+    err.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    ldr.classList.remove('show');
+  }
+}
+
+document.getElementById('input-grupo').addEventListener('keydown', e => {
+  if (e.key === 'Enter') buscarGrupo();
+});
+
+function volverBusqueda() {
+  document.getElementById('screen-expediente').style.display = 'none';
+  document.getElementById('action-bar').classList.remove('visible');
+  document.getElementById('screen-search').style.display = 'flex';
+  grupoActivo = null;
+}
+
+// ═══════════════════════════════════════════
+// RENDER EXPEDIENTE
+// ═══════════════════════════════════════════
+function renderExpediente() {
+  const rows = datosGrupo;
+  const n = rows.length;
+
+  // ── Score Ring ──
+  // Average IPP score
+  const scores = rows.map(r => num(r,'cdc_score_post') || num(r,'ipp_score')).filter(x => x > 0);
+  const avgScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+
+  document.getElementById('exp-nombre').textContent = toTitle(grupoActivo);
+  document.getElementById('exp-meta').textContent   = `${n} integrantes · Expediente completo`;
+
+  document.getElementById('ring-num').textContent = avgScore;
+  const ring = document.getElementById('ring-fill');
+  const circumference = 2 * Math.PI * 42;
+  const offset = circumference - (avgScore / 100) * circumference;
+  const ringColor = avgScore >= 70 ? '#12B76A' : avgScore >= 50 ? '#F79009' : '#F04438';
+  ring.style.stroke = ringColor;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  // Grado counts
+  const gc = { A:0, B:0, C:0, D:0 };
+  rows.forEach(r => { const g = v(r,'cdc_grado_final').toUpperCase(); if(gc[g]!==undefined) gc[g]++; });
+
+  document.getElementById('grado-row').innerHTML =
+    Object.entries(gc).filter(([,n])=>n>0)
+      .map(([g,n])=>`<span class="grado-pill ${pillClass(g)}">${g} · ${n}</span>`).join('');
+
+  // Veredicto del sistema
+  const dCount = gc['D'];
+  const strip = document.getElementById('veredicto-strip');
+  const vIcon = document.getElementById('veredicto-icon');
+  const vText = document.getElementById('veredicto-text');
+  const vSub  = document.getElementById('veredicto-sub');
+
+  if (dCount === 0) {
+    strip.className = 'veredicto-strip aprobar';
+    vIcon.textContent = '✅'; vText.textContent = 'Sistema sugiere: APROBAR';
+    vSub.textContent  = 'Sin integrantes con calificación D';
+  } else if (dCount <= Math.floor(n * 0.3)) {
+    strip.className = 'veredicto-strip pendiente';
+    vIcon.textContent = '⚠️'; vText.textContent = 'Sistema sugiere: REVISAR';
+    vSub.textContent  = `${dCount} de ${n} integrantes con grado D`;
+  } else {
+    strip.className = 'veredicto-strip rechazar';
+    vIcon.textContent = '🚫'; vText.textContent = 'Sistema sugiere: NO APROBAR';
+    vSub.textContent  = `${dCount} de ${n} integrantes con grado D (${Math.round(dCount/n*100)}%)`;
+  }
+
+  // Render sections
+  renderVisita();
+  renderAlertas(rows);
+  renderCapacidadPago(rows);
+  renderDetalle(rows);
+}
+
+// ── VISITA ÚNICA ──
+function renderVisita() {
+  const el = document.getElementById('visita-content');
+  const badge = document.getElementById('badge-visita');
+
+  if (!visitaData) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">ℹ️ No se encontró registro de Visita Única para este grupo.</div>';
+    badge.textContent = 'Sin datos';
+    badge.style.background = '#F3F4F6'; badge.style.color = '#6B7280';
+    return;
+  }
+
+  const vd = visitaData;
+  const veredicto = vd.veredicto || 'pendiente';
+
+  // Compute score from V1-V10
+  const vIds = ['v1','v2','v3','v4','v5','v6','v7','v8','v9','v10'];
+  let pts = 0, maxPts = 0;
+  vIds.forEach(id => {
+    const val = (vd[id]||'').toLowerCase();
+    if (val === 'noapl') return;
+    maxPts += 10;
+    if (val === 'si') pts += 10;
+    else if (val === 'parcial') pts += 5;
+  });
+  const visitaScore = maxPts > 0 ? Math.round((pts / maxPts) * 100) : 0;
+
+  if (veredicto === 'aprobar') {
+    badge.textContent = 'CE: Aprobar';
+    badge.style.background = '#DCFCE7'; badge.style.color = '#166534';
+  } else {
+    badge.textContent = 'CE: No aprobar';
+    badge.style.background = '#FEE2E2'; badge.style.color = '#B91C1C';
+  }
+
+  const dims = [
+    { label: 'Cohesión del grupo',       ids: ['v1','v2','v3'] },
+    { label: 'Ubicabilidad',             ids: ['v4','v5'] },
+    { label: 'Verificabilidad e identidad', ids: ['v6','v7','v8'] },
+    { label: 'Comprensión del producto', ids: ['v9','v10'] },
+  ];
+
+  let dimHTML = dims.map(d => {
+    const allSi = d.ids.every(id => (vd[id]||'').toLowerCase() === 'si' || (vd[id]||'').toLowerCase() === 'noapl');
+    const anyNo = d.ids.some(id => (vd[id]||'').toLowerCase() === 'no');
+    const icon  = anyNo ? '⚠️' : allSi ? '✅' : '⚠️';
+    return `<div class="dim-row"><span class="dim-icon">${icon}</span>${d.label}</div>`;
+  }).join('');
+
+  // Notas
+  const urgencia    = (vd.nota_urgencia||'').toUpperCase() === 'SÍ';
+  const interaccion = (vd.nota_interaccion||'').toUpperCase() === 'SÍ';
+  const comentarios = vd.comentarios || '';
+
+  let obsHTML = '';
+  if (urgencia || interaccion) {
+    obsHTML = `<div class="obs-card">
+      <div class="obs-label">NOTAS DEL CE</div>
+      ${urgencia ? '<div>⚡ Se detectó urgencia inusual por cerrar</div>' : ''}
+      ${interaccion ? '<div>🔍 Interacción no natural entre integrantes</div>' : ''}
+    </div>`;
+  } else {
+    obsHTML = `<div class="obs-card ok"><div class="obs-label">NOTAS DEL CE</div>Sin alertas conductuales detectadas</div>`;
+  }
+
+  let comHTML = '';
+  if (comentarios) {
+    comHTML = `<div style="padding:0 18px 14px;font-size:13px;color:var(--text2);">
+      <span style="font-weight:700;color:var(--text);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Comentarios CE:</span><br/>
+      "${comentarios}"
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="visita-row">
+      <span class="visita-label">Score de visita</span>
+      <span class="visita-val ${visitaScore>=90?'green':visitaScore>=70?'amber':'red'}">${visitaScore}/100</span>
+    </div>
+    <div class="visita-row">
+      <span class="visita-label">Veredicto del CE</span>
+      <span class="visita-val ${veredicto==='aprobar'?'green':'red'}">${veredicto==='aprobar'?'✅ Aprobar':'🔴 No aprobar'}</span>
+    </div>
+    <div class="visita-row">
+      <span class="visita-label">Fecha de visita</span>
+      <span class="visita-val" style="color:var(--text2);font-size:12px">${vd.fecha ? new Date(vd.fecha).toLocaleDateString('es-MX') : '—'}</span>
+    </div>
+    <div style="padding:14px 18px 0;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Checklist por dimensión</div>
+    ${dimHTML}
+    ${obsHTML}
+    ${comHTML}
+  `;
+}
+
+// ── ALERTAS ──
+function renderAlertas(rows) {
+  const n = rows.length;
+  let html = '', activas = 0;
+
+  // R1: Deuda > $25K
+  const r1 = rows.filter(r => num(r,'cdc_saldo_total') > 25000);
+  if (r1.length > 0) {
+    activas++;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Deuda individual alta</div><div class="al-count">${r1.length}/${n}</div></div>
+      <div class="al-desc">${r1.length} integrante(s) con deuda total &gt; $25,000</div>
+      <table class="al-table"><tr><th>Integrante</th><th>Deuda</th></tr>
+      ${r1.map(r=>`<tr><td>${fullName(r)}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
+  } else {
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Deuda individual alta</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Ningún integrante supera $25,000</div></div>`;
+  }
+
+  // R2: 3+ instituciones con deuda > $15K
+  const r2 = rows.filter(r => num(r,'cdc_total_cuentas') >= 3 && num(r,'cdc_saldo_total') > 15000);
+  if (r2.length > 0) {
+    activas++;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Múltiples instituciones</div><div class="al-count">${r2.length}/${n}</div></div>
+      <div class="al-desc">${r2.length} integrante(s) con 3+ cuentas y deuda &gt; $15K</div>
+      <table class="al-table"><tr><th>Integrante</th><th>Ctas</th><th>Deuda</th></tr>
+      ${r2.map(r=>`<tr><td>${fullName(r)}</td><td>${num(r,'cdc_total_cuentas')}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
+  } else {
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Múltiples instituciones</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Sin acumulación de deuda multi-institucional</div></div>`;
+  }
+
+  // R3: Familiares
+  const apCount = {};
+  rows.forEach(r => [v(r,'ap_paterno'),v(r,'ap_materno')].filter(Boolean).forEach(ap => {
+    const k = ap.toUpperCase(); apCount[k] = (apCount[k]||0) + 1;
+  }));
+  const fam = Object.entries(apCount).filter(([,c])=>c>=3);
+  if (fam.length > 0) {
+    activas++;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Posibles familiares</div><div class="al-count">Detectado</div></div>
+      <div class="al-desc">Apellidos compartidos por 3+ integrantes</div>
+      <table class="al-table"><tr><th>Apellido</th><th>Coincidencias</th></tr>
+      ${fam.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table></div>`;
+  } else {
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Posibles familiares</div><div class="al-count">—</div></div><div class="al-ok">✅ Sin concentración familiar</div></div>`;
+  }
+
+  // R4: Grado D
+  const r4 = rows.filter(r => v(r,'cdc_grado_final').toUpperCase() === 'D');
+  if (r4.length > 0) {
+    activas++;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Calificación D (buró)</div><div class="al-count">${r4.length}/${n}</div></div>
+      <div class="al-desc">${r4.length} integrante(s) con grado final D</div>
+      <table class="al-table"><tr><th>Integrante</th><th>Motivo</th></tr>
+      ${r4.map(r=>`<tr><td>${fullName(r)}</td><td style="font-family:'DM Sans';font-size:11px">${(v(r,'cdc_reglas')||'—').split('|')[0].replace(/📉|📊|✅/g,'').trim()}</td></tr>`).join('')}</table></div>`;
+  } else {
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Calificación D</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Sin integrantes grado D</div></div>`;
+  }
+
+  // R5: Disparidad montos
+  const montos = rows.map(r => ({name:fullName(r), m:num(r,'monto_solicitado')})).filter(x=>x.m>0);
+  if (montos.length >= 2) {
+    const minM = montos.reduce((a,b)=>a.m<b.m?a:b);
+    const maxM = montos.reduce((a,b)=>a.m>b.m?a:b);
+    const ratio = minM.m > 0 ? maxM.m / minM.m : 0;
+    if (ratio >= 1.5) {
+      activas++;
+      html += `<div class="al-item"><div class="al-head"><div class="al-name">Disparidad de montos</div><div class="al-count">${ratio.toFixed(1)}×</div></div>
+        <div class="al-desc">Monto máximo es ${ratio.toFixed(1)}× el mínimo</div>
+        <table class="al-table"><tr><th>Mínimo</th><th>Máximo</th></tr>
+        <tr><td>${minM.name}: ${fmt(minM.m)}</td><td>${maxM.name}: ${fmt(maxM.m)}</td></tr></table></div>`;
+    } else {
+      html += `<div class="al-item"><div class="al-head"><div class="al-name">Disparidad de montos</div><div class="al-count">—</div></div><div class="al-ok">✅ Montos consistentes</div></div>`;
+    }
+  }
+
+  document.getElementById('alertas-content').innerHTML = html;
+  const ba = document.getElementById('badge-alertas');
+  ba.textContent = activas > 0 ? `${activas} activas` : 'Sin alertas';
+  ba.style.background = activas > 0 ? '#FEE2E2' : '#DCFCE7';
+  ba.style.color = activas > 0 ? '#B91C1C' : '#166534';
+}
+
+// ── CAPACIDAD DE PAGO ──
+function renderCapacidadPago(rows) {
+  const n = rows.length;
+  const ingresos = rows.map(r=>num(r,'ingresos')).filter(x=>x>10);
+  const flujos   = rows.map(r=>num(r,'flujo_neto')).filter(x=>x!==0);
+  const caps     = rows.map(r=>num(r,'capacidad')).filter(x=>x>0);
+  const montos   = rows.map(r=>num(r,'monto_solicitado'));
+  const vencidos = rows.map(r=>num(r,'cdc_saldo_vencido'));
+  const conExp   = rows.filter(r=>num(r,'cdc_total_cuentas')>0).length;
+
+  const avgIng  = ingresos.length ? ingresos.reduce((a,b)=>a+b,0)/ingresos.length : 0;
+  const avgFlujo= flujos.length   ? flujos.reduce((a,b)=>a+b,0)/flujos.length : 0;
+  const avgCap  = caps.length     ? caps.reduce((a,b)=>a+b,0)/caps.length : 0;
+  const totMonto= montos.reduce((a,b)=>a+b,0);
+  const totVenc = vencidos.reduce((a,b)=>a+b,0);
+  const conVenc = vencidos.filter(x=>x>0).length;
+
+  const flujoC = avgFlujo>=1000?'green':avgFlujo>=500?'amber':'red';
+  const vencC  = totVenc>0?'red':'green';
+
+  document.getElementById('badge-pago').textContent = `${fmt(Math.round(avgFlujo))}/sem`;
+  document.getElementById('pago-content').innerHTML = `
+    <div class="cp-row"><span class="cp-label">Ingreso promedio/integrante</span><span class="cp-value">${fmt(Math.round(avgIng))}/sem</span></div>
+    <div class="cp-row"><span class="cp-label">Flujo neto promedio</span><span class="cp-value ${flujoC}">${fmt(Math.round(avgFlujo))}/sem</span></div>
+    <div class="cp-row"><span class="cp-label">Capacidad pago declarada prom.</span><span class="cp-value green">${fmt(Math.round(avgCap))}/sem</span></div>
+    <div class="cp-row"><span class="cp-label">Experiencia crediticia</span><span class="cp-value amber">${conExp} de ${n}</span></div>
+    <div class="cp-row"><span class="cp-label">Monto total solicitado</span><span class="cp-value">${fmt(totMonto)}</span></div>
+    <div class="cp-row"><span class="cp-label">Saldo vencido total en grupo</span><span class="cp-value ${vencC}">${fmt(totVenc)}</span></div>
+    <div class="cp-row"><span class="cp-label">Integrantes con saldo vencido</span><span class="cp-value ${conVenc>0?'red':'green'}">${conVenc} de ${n}</span></div>`;
+}
+
+// ── DETALLE POR INTEGRANTE ──
+function renderDetalle(rows) {
+  const orden = {D:0,C:1,B:2,A:3};
+  const sorted = [...rows].sort((a,b) => (orden[v(a,'cdc_grado_final').toUpperCase()]||9) - (orden[v(b,'cdc_grado_final').toUpperCase()]||9));
+
+  const gc = {A:0,B:0,C:0,D:0};
+  rows.forEach(r => { const g = v(r,'cdc_grado_final').toUpperCase(); if(gc[g]!==undefined) gc[g]++; });
+
+  let tabs = `<div class="filter-row"><button class="ftab active" onclick="filterInt('todos',this)">Total · ${rows.length}</button>`;
+  ['A','B','C','D'].forEach(g => { if(gc[g]>0) tabs += `<button class="ftab ${g}" onclick="filterInt('${g}',this)">${g} · ${gc[g]}</button>`; });
+  tabs += `</div>`;
+
+  const cards = sorted.map((r,i) => buildCard(r,i)).join('');
+  document.getElementById('detalle-content').innerHTML = tabs + cards;
+  document.getElementById('detalle-sub').textContent = `${rows.length} integrantes · Score IPP + CDC`;
+
+  const dCount = gc['D'];
+  const bd = document.getElementById('badge-detalle');
+  bd.textContent = dCount > 0 ? `${dCount} Cal. D` : 'Sin Cal. D';
+  bd.style.background = dCount > 0 ? '#FEE2E2' : '#DCFCE7';
+  bd.style.color = dCount > 0 ? '#B91C1C' : '#166534';
+}
+
+function buildCard(r, idx) {
+  const id = 'i'+idx;
+  const gF = v(r,'cdc_grado_final').toUpperCase()||'—';
+  const gP = v(r,'cdc_grado_pre').toUpperCase()||'—';
+  const score = num(r,'cdc_score_post') || num(r,'ipp_score');
+  const ing = num(r,'ingresos');
+  const flujo = num(r,'flujo_neto');
+  const cap = num(r,'capacidad');
+  const sT = num(r,'cdc_saldo_total');
+  const sV = num(r,'cdc_saldo_vencido');
+  const atr = num(r,'cdc_cuentas_atr');
+  const peor = num(r,'cdc_max_atraso');
+  const cons = num(r,'cdc_total_cons')||0;
+  const ctas = num(r,'cdc_total_cuentas');
+  const corr = num(r,'cdc_cuentas_corr');
+  const capa = v(r,'cdc_capa').toUpperCase();
+  const reglas = v(r,'cdc_reglas');
+  const excl = v(r,'cdc_excluidas');
+  const flags = v(r,'cdc_flags');
+  const ine = v(r,'ine_coincide');
+  const antNeg = v(r,'ant_negocio');
+  const tipDom = v(r,'tipo_domicilio');
+  const otros = v(r,'otros_creditos');
+
+  let tags = tagFromRec(r);
+  if (atr >= 3) tags += `<span class="tag tag-amber">${atr} ctas atraso</span>`;
+  else if (atr > 0) tags += `<span class="tag tag-amber">${atr} cta atraso</span>`;
+  if (sV > 10000) tags += `<span class="tag tag-amber">${fmt(sV)} vencido</span>`;
+  if (cons >= 6)  tags += `<span class="tag tag-gray">${cons} consultas</span>`;
+
+  const ingStr = ing > 100 ? `Ing: ${fmt(ing)}/sem` : 'Ing: verificar';
+  const flujoStr = flujo !== 0 ? `Flujo: ${fmt(flujo)}` : '';
+  const capStr = cap !== 0 ? `Cap: ${fmt(cap)}` : '';
+  const meta = [ingStr, flujoStr, capStr].filter(Boolean).join(' · ');
+
+  const tieneA = v(r,'cdc_tiene_fd')==='SÍ' || v(r,'cdc_tiene_sg')==='SÍ' || v(r,'cdc_tiene_im')==='SÍ';
+  const tieneB = num(r,'cdc_capa_b') > 0;
+  const gradoAjuste = gP !== gF ? `${gP} → ${gF}` : `${gF} (sin cambio)`;
+  const reglasClean = reglas.replace(/📉|📊|✅/g,'').trim() || 'Sin hallazgos negativos';
+  const ineColor = ine.toLowerCase().includes('sí') ? 'color:var(--green)' : 'color:var(--red)';
+
+  return `
+  <div class="int-card" data-grado="${gF}">
+    <div class="int-head">
+      <div class="int-left">
+        <div class="int-name">${fullName(r)}</div>
+        <div class="int-meta">${meta}</div>
+        <div class="int-tags">${tags}</div>
+      </div>
+      <div class="int-score">
+        <div class="int-score-num ${gradoColor(gF)}">${Math.round(score)||'—'}</div>
+        <div class="int-score-cal">CAL. ${gF}</div>
+      </div>
+    </div>
+    <div class="int-toggle" onclick="toggleExp('${id}')">
+      <span id="lbl-${id}">Ver detalle completo</span>
+      <span id="ch-${id}">▼</span>
+    </div>
+    <div class="int-expand" id="exp-${id}">
+      <div class="int-tabs">
+        <div class="int-tab active" onclick="switchTab('${id}','postburo',this)">POST-BURÓ</div>
+        <div class="int-tab" onclick="switchTab('${id}','score',this)">SCORE</div>
+        <div class="int-tab" onclick="switchTab('${id}','cdc',this)">CUENTAS CDC</div>
+      </div>
+
+      <div class="int-panel active" id="${id}-postburo">
+        <div class="capa-row"><div class="capa-dot ${tieneA?'dot-red':'dot-green'}"></div><div><div class="capa-lbl">CAPA A · RECHAZO ABSOLUTO</div><div class="capa-val ${tieneA?'red':'green'}">${tieneA?'Activada':'No activada'}</div></div></div>
+        <div class="capa-row"><div class="capa-dot ${tieneB?'dot-red':'dot-green'}"></div><div><div class="capa-lbl">CAPA B · VENTANA 12 MESES</div><div class="capa-val ${tieneB?'red':'green'}">${tieneB?'Activada':'No activada'}</div></div></div>
+        <div class="capa-row"><div class="capa-dot ${capa==='C'?'dot-red':'dot-green'}"></div><div><div class="capa-lbl">CAPA C · DEGRADACIÓN</div><div class="capa-val ${capa==='C'?'red':'green'}">${capa==='C'?reglasClean.split('|')[0].trim():'No activada'}</div></div></div>
+        <div class="capa-row"><div class="capa-dot dot-amber"></div><div><div class="capa-lbl">GRADO AJUSTADO</div><div class="capa-val ${gP!==gF?'red':'green'}">${gradoAjuste}</div></div></div>
+        <div class="cons-box"><span style="color:var(--text2)">Consultas al buró (12m)</span><span class="cons-val ${cons>=6?'high':'ok'}">${cons}</span></div>
+      </div>
+
+      <div class="int-panel" id="${id}-score">
+        <div class="detail-row"><span class="detail-lbl">Score IPP (pre-buró)</span><span class="detail-val">${num(r,'ipp_score')||'—'} / 100</span></div>
+        <div class="detail-row"><span class="detail-lbl">Grado pre-buró</span><span class="detail-val">${gP}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Score post-buró</span><span class="detail-val">${Math.round(score)||'—'}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Grado final CDC</span><span class="detail-val ${gradoColor(gF)}" style="font-weight:800">${gF}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Antigüedad negocio</span><span class="detail-val" style="font-family:'DM Sans'">${antNeg||'—'}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Tipo domicilio</span><span class="detail-val" style="font-family:'DM Sans'">${tipDom||'—'}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Coincidencia INE</span><span class="detail-val" style="${ineColor};font-family:'DM Sans'">${ine||'—'}</span></div>
+        ${otros ? `<div class="detail-row"><span class="detail-lbl">Otros créditos</span><span class="detail-val" style="font-family:'DM Sans'">${otros}</span></div>` : ''}
+      </div>
+
+      <div class="int-panel" id="${id}-cdc">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px">Historial crediticio (CDC)</div>
+        <div class="cdc-block">
+          <div class="cdc-block-title">Saldo total / Saldo vencido</div>
+          <div class="cdc-block-info">${fmt(sT)} total · ${fmt(sV)} vencido</div>
+          ${sV > 0
+            ? `<div class="cdc-block-status bad">⚠ ${atr} cta(s) con atraso · Peor: ${peor} días</div>`
+            : `<div class="cdc-block-status good">✓ Sin saldo vencido</div>`}
+        </div>
+        <div class="cdc-block">
+          <div class="cdc-block-title">Cuentas</div>
+          <div class="cdc-block-info">${ctas} total · ${corr} corriente · ${atr} atraso</div>
+        </div>
+        ${flags ? `<div class="cdc-block"><div class="cdc-block-title">Banderas de prevención</div><div class="cdc-block-info">${flags}</div></div>` : ''}
+        ${excl ? `<div class="cdc-block"><div class="cdc-block-title">Cuentas excluidas</div><div class="cdc-block-info" style="font-size:11px">${excl}</div></div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// UI INTERACTIONS
+// ═══════════════════════════════════════════
+function toggleSec(id) {
+  const body = document.getElementById('body-'+id);
+  const chev = document.getElementById('chev-'+id);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleExp(id) {
+  const exp = document.getElementById('exp-'+id);
+  const lbl = document.getElementById('lbl-'+id);
+  const ch  = document.getElementById('ch-'+id);
+  const open = exp.classList.toggle('open');
+  lbl.textContent = open ? 'Ocultar detalle' : 'Ver detalle completo';
+  ch.textContent  = open ? '▲' : '▼';
+}
+
+function switchTab(intId, tab, el) {
+  const exp = document.getElementById('exp-'+intId);
+  exp.querySelectorAll('.int-tab').forEach(t => t.classList.remove('active'));
+  exp.querySelectorAll('.int-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(intId+'-'+tab).classList.add('active');
+}
+
+function filterInt(grado, btn) {
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.int-card').forEach(c => {
+    c.style.display = (grado==='todos' || c.dataset.grado===grado) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════
+function openModal(type) {
+  const grupo = toTitle(grupoActivo);
+  if (type === 'revision') {
+    document.getElementById('modal-rev-grupo').textContent = `Grupo: ${grupo}`;
+    document.getElementById('ta-revision').value = '';
+    document.getElementById('err-revision').classList.remove('show');
+  } else {
+    document.getElementById('modal-apr-grupo').textContent = `Grupo: ${grupo}`;
+    document.getElementById('ta-aprobar').value = '';
+    document.getElementById('err-aprobar').classList.remove('show');
+  }
+  document.getElementById('modal-'+type).classList.add('show');
+}
+
+function closeModal(type) {
+  document.getElementById('modal-'+type).classList.remove('show');
+}
+
+// Close on overlay click
+['revision','aprobar'].forEach(type => {
+  document.getElementById('modal-'+type).addEventListener('click', function(e) {
+    if (e.target === this) closeModal(type);
+  });
+});
+
+function confirmar(type) {
+  const ta  = document.getElementById('ta-'+type);
+  const err = document.getElementById('err-'+type);
+  const comment = ta.value.trim();
+
+  if (!comment) {
+    err.classList.add('show');
+    ta.style.borderColor = 'var(--red)';
+    ta.focus();
+    return;
+  }
+
+  err.classList.remove('show');
+  ta.style.borderColor = '';
+
+  // Build row
+  const now = new Date().toISOString();
+  const row = {
+    tipo: 'revision_cs',
+    fecha: now,
+    grupo: grupoActivo,
+    accion: type === 'aprobar' ? 'APROBADO' : 'SOLICITAR_REVISION',
+    comentarios_cs: comment,
+    integrantes: datosGrupo.length,
+  };
+
+  // Guardar via Apps Script
+  if (APPS_SCRIPT_URL) {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(row)
+    }).catch(() => {});
+  }
+
+  // Show success
+  closeModal(type);
+  document.getElementById('screen-expediente').style.display = 'none';
+  document.getElementById('action-bar').classList.remove('visible');
+
+  const ss = document.getElementById('screen-success');
+  if (type === 'aprobar') {
+    document.getElementById('success-icon').textContent  = '✅';
+    document.getElementById('success-title').textContent = 'Grupo aprobado';
+    document.getElementById('success-sub').textContent   = 'La aprobación ha sido registrada correctamente.';
+  } else {
+    document.getElementById('success-icon').textContent  = '⚑';
+    document.getElementById('success-title').textContent = 'Revisión solicitada';
+    document.getElementById('success-sub').textContent   = 'El expediente ha sido devuelto para revisión.';
+  }
+  document.getElementById('success-detail').textContent = `${toTitle(grupoActivo)} · ${new Date().toLocaleDateString('es-MX')} · ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`;
+  ss.classList.add('show');
+}
+
+function volverInicio() {
+  document.getElementById('screen-success').classList.remove('show');
+  document.getElementById('screen-search').style.display = 'flex';
+  document.getElementById('input-grupo').value = '';
+  grupoActivo = null;
+}
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
