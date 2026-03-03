@@ -553,6 +553,77 @@ body {
 }
 .success-btn:hover { background: #126E40; }
 
+/* ── VISITA PER-PERSON ── */
+.vu-section-label {
+  padding: 14px 18px 6px; font-size: 10px; font-weight: 700;
+  color: var(--text3); letter-spacing: 1.2px; text-transform: uppercase;
+}
+.vu-person {
+  margin: 0 14px 8px; border-radius: var(--r-sm);
+  border: 1.5px solid var(--border); overflow: hidden; background: #fff;
+}
+.vu-person.has-alerts { border-left: 4px solid var(--amber-border); }
+.vu-person.critical   { border-left: 4px solid var(--red-border); }
+.vu-person.clean      { border-left: 4px solid var(--green-border); }
+.vu-person-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; cursor: pointer; user-select: none;
+}
+.vu-person-left { display: flex; align-items: center; gap: 10px; }
+.vu-person-icon { font-size: 18px; flex-shrink: 0; }
+.vu-person-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.vu-person-status { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.vu-person-chev {
+  font-size: 11px; color: var(--text3); transition: transform 0.2s;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--surface2);
+}
+.vu-person-chev.open { transform: rotate(180deg); }
+.vu-person-detail { display: none; border-top: 1px solid var(--border); padding: 10px 14px; background: var(--surface2); }
+.vu-person-detail.open { display: block; }
+.vu-flag {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.vu-flag:last-child { border-bottom: none; }
+.vu-flag-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+.vu-flag-dim { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+.vu-flag-dim.amber { color: var(--amber); }
+.vu-flag-dim.red   { color: var(--red); }
+.vu-flag-q { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.vu-flag-comment { font-size: 11px; color: var(--text3); font-style: italic; margin-top: 3px; }
+
+.vu-stats-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; padding: 10px 14px;
+}
+.vu-stat { text-align: center; padding: 10px 6px; border-radius: var(--r-sm); }
+.vu-stat.green { background: var(--green-bg); border: 1px solid var(--green-border); }
+.vu-stat.amber { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+.vu-stat.red   { background: var(--red-bg);   border: 1px solid var(--red-border); }
+.vu-stat-num { font-size: 22px; font-weight: 800; line-height: 1; margin-bottom: 2px; }
+.vu-stat-num.green { color: var(--green); }
+.vu-stat-num.amber { color: var(--amber); }
+.vu-stat-num.red   { color: var(--red); }
+.vu-stat-label { font-size: 11px; font-weight: 500; color: var(--text2); }
+
+.vu-notas-card {
+  margin: 6px 14px 10px; padding: 14px;
+  border-radius: var(--r-sm); font-size: 13px;
+}
+.vu-notas-card.warn { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); }
+.vu-notas-card.ok   { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+.vu-notas-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.vu-notas-sub   { font-size: 12px; opacity: 0.8; }
+.vu-notas-flag  { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-weight: 600; }
+
+.vu-obs {
+  margin: 0 14px 14px; padding: 14px; border-radius: var(--r-sm);
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.vu-obs-label { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.vu-obs-text  { font-size: 13px; color: var(--text2); font-style: italic; line-height: 1.5; }
+
 /* ── TOAST ── */
 .toast {
   position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -1139,7 +1210,20 @@ function renderExpediente() {
   renderDetalle(rows);
 }
 
-// ── VISITA ÚNICA ──
+// ── VISITA ÚNICA (con detalle por persona) ──
+const VU_PREGUNTAS = [
+  { id: 'v1',  texto: '¿Llegaron todas y se mantuvieron durante la sesión?',        dim: 'Cohesión' },
+  { id: 'v2',  texto: '¿El grupo respondió sin ayuda de alguien ajeno?',             dim: 'Cohesión' },
+  { id: 'v3',  texto: '¿Cada integrante respondió por sí misma?',                    dim: 'Cohesión' },
+  { id: 'v4',  texto: '¿Pudieron describir dónde vive cada una?',                    dim: 'Ubicabilidad' },
+  { id: 'v5',  texto: '¿Pudieron describir el negocio de cada una?',                 dim: 'Ubicabilidad' },
+  { id: 'v6',  texto: '¿Identidad verificada (INE vs rostro) para todas?',           dim: 'Verificación' },
+  { id: 'v7',  texto: '¿Negocio consistente (lo que dicen vs lo observado)?',        dim: 'Verificación' },
+  { id: 'v8',  texto: '¿Reconocen deudas y saben cuánto pagan y a quién?',           dim: 'Verificación' },
+  { id: 'v9',  texto: '¿Quedó claro para todas qué es un crédito solidario?',        dim: 'Producto' },
+  { id: 'v10', texto: '¿Aceptan que si una falla, las demás responden?',              dim: 'Producto' },
+];
+
 function renderVisita() {
   const el = document.getElementById('visita-content');
   const badge = document.getElementById('badge-visita');
@@ -1148,27 +1232,20 @@ function renderVisita() {
     el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
       <div style="font-size:24px;margin-bottom:8px;">ℹ️</div>
       No se encontró registro de Visita Única para este grupo.<br/>
-      <span style="font-size:11px;margin-top:6px;display:block;">Si hay datos en la pestaña Visita_Unica, abre la consola del navegador (F12) para ver el diagnóstico.<br/>
-      Es posible que necesites configurar el GID numérico de la pestaña.</span>
+      <span style="font-size:11px;margin-top:6px;display:block;">Si hay datos en la pestaña Visita_Unica, abre la consola (F12) para diagnóstico.</span>
     </div>`;
-    badge.textContent = 'Sin datos';
-    badge.style.background = '#F3F4F6'; badge.style.color = '#6B7280';
+    badge.textContent = 'Sin datos'; badge.style.background = '#F3F4F6'; badge.style.color = '#6B7280';
     return;
   }
 
   const vd = visitaData;
-  // Safe accessor — busca por nombre de key, luego por key en minúsculas
-  const vg = (key) => {
-    const k = key.toLowerCase();
-    return vd[k] || vd[key] || '';
-  };
+  const vg = (key) => { const k = key.toLowerCase(); return vd[k] || vd[key] || ''; };
   const veredicto = vg('veredicto') || 'pendiente';
 
-  // Compute score from V1-V10
-  const vIds = ['v1','v2','v3','v4','v5','v6','v7','v8','v9','v10'];
+  // Score
   let pts = 0, maxPts = 0;
-  vIds.forEach(id => {
-    const val = vg(id).toLowerCase();
+  VU_PREGUNTAS.forEach(p => {
+    const val = vg(p.id).toLowerCase();
     if (!val || val === 'noapl') return;
     maxPts += 10;
     if (val === 'si') pts += 10;
@@ -1176,52 +1253,163 @@ function renderVisita() {
   });
   const visitaScore = maxPts > 0 ? Math.round((pts / maxPts) * 100) : 0;
 
+  // Badge
   if (veredicto === 'aprobar') {
-    badge.textContent = 'CE: Aprobar';
-    badge.style.background = '#DCFCE7'; badge.style.color = '#166534';
+    badge.textContent = 'CE: Aprobar'; badge.style.background = '#DCFCE7'; badge.style.color = '#166534';
   } else {
-    badge.textContent = 'CE: No aprobar';
-    badge.style.background = '#FEE2E2'; badge.style.color = '#B91C1C';
+    badge.textContent = 'CE: No aprobar'; badge.style.background = '#FEE2E2'; badge.style.color = '#B91C1C';
   }
 
-  const dims = [
-    { label: 'Cohesión del grupo',       ids: ['v1','v2','v3'] },
-    { label: 'Ubicabilidad',             ids: ['v4','v5'] },
-    { label: 'Verificabilidad e identidad', ids: ['v6','v7','v8'] },
-    { label: 'Comprensión del producto', ids: ['v9','v10'] },
-  ];
+  // ── Nivel de revisión ──
+  let nivelEmoji, nivelText, nivelColor;
+  if (visitaScore >= 90) { nivelEmoji = '✅'; nivelText = 'Revisión estándar'; nivelColor = 'green'; }
+  else if (visitaScore >= 70) { nivelEmoji = '⚠️'; nivelText = 'Revisión detallada'; nivelColor = 'amber'; }
+  else { nivelEmoji = '🔴'; nivelText = 'Revisión crítica'; nivelColor = 'red'; }
 
-  let dimHTML = dims.map(d => {
-    const allSi = d.ids.every(id => vg(id).toLowerCase() === 'si' || vg(id).toLowerCase() === 'noapl');
+  // ── Checklist por dimensión ──
+  const dims = [
+    { label: 'Cohesión del grupo',          ids: ['v1','v2','v3'] },
+    { label: 'Ubicabilidad',                ids: ['v4','v5'] },
+    { label: 'Verificabilidad e identidad', ids: ['v6','v7','v8'] },
+    { label: 'Comprensión del producto',    ids: ['v9','v10'] },
+  ];
+  const dimHTML = dims.map(d => {
+    const allSi = d.ids.every(id => { const v2 = vg(id).toLowerCase(); return v2 === 'si' || v2 === 'noapl'; });
     const anyNo = d.ids.some(id => vg(id).toLowerCase() === 'no');
     const icon  = anyNo ? '⚠️' : allSi ? '✅' : '⚠️';
     return `<div class="dim-row"><span class="dim-icon">${icon}</span>${d.label}</div>`;
   }).join('');
 
-  // Notas
+  // ── Detalle por persona ──
+  // Parse integrantes from the visita data
+  const integrantesRaw = vg('integrantes');
+  const integrantes = integrantesRaw
+    ? integrantesRaw.split('|').map(n => n.trim()).filter(Boolean)
+    : datosGrupo.map(r => fullName(r));
+
+  // Build per-person alerts
+  const personEstado = {};
+  integrantes.forEach(name => { personEstado[name] = { alertas: [], nivel: 'ok' }; });
+
+  VU_PREGUNTAS.forEach(p => {
+    const val = vg(p.id).toLowerCase();
+    if (!val || val === 'si' || val === 'noapl') return;
+
+    const afectadasRaw = vg(p.id + '_afectadas');
+    const comentario   = vg(p.id + '_comentario');
+
+    if (val === 'no') {
+      // "No" afecta a todas
+      integrantes.forEach(name => {
+        if (!personEstado[name]) return;
+        personEstado[name].alertas.push({ pregunta: p, val: 'no', comentario });
+        personEstado[name].nivel = 'critica';
+      });
+    } else if (val === 'parcial') {
+      // "Parcial" afecta solo a las marcadas
+      const afectadas = afectadasRaw ? afectadasRaw.split(',').map(n => n.trim()).filter(Boolean) : [];
+      if (afectadas.length > 0) {
+        afectadas.forEach(name => {
+          // Buscar match fuzzy (el nombre puede estar abreviado)
+          const matched = integrantes.find(full =>
+            full.toUpperCase().includes(name.toUpperCase()) || name.toUpperCase().includes(full.split(' ')[0].toUpperCase())
+          ) || name;
+          if (!personEstado[matched]) personEstado[matched] = { alertas: [], nivel: 'ok' };
+          personEstado[matched].alertas.push({ pregunta: p, val: 'parcial', comentario });
+          if (personEstado[matched].nivel !== 'critica') personEstado[matched].nivel = 'alerta';
+        });
+      } else {
+        // Sin afectadas específicas → marcar a todas como parcial
+        integrantes.forEach(name => {
+          if (!personEstado[name]) return;
+          personEstado[name].alertas.push({ pregunta: p, val: 'parcial', comentario });
+          if (personEstado[name].nivel !== 'critica') personEstado[name].nivel = 'alerta';
+        });
+      }
+    }
+  });
+
+  // Counters
+  const cleanCount   = integrantes.filter(n => personEstado[n]?.nivel === 'ok').length;
+  const alertCount   = integrantes.filter(n => personEstado[n]?.nivel === 'alerta').length;
+  const critCount    = integrantes.filter(n => personEstado[n]?.nivel === 'critica').length;
+
+  // Short name helper
+  const shortN = (full) => {
+    const parts = full.trim().split(' ');
+    if (parts.length <= 1) return full;
+    return parts[0] + ' ' + parts[1][0] + '.';
+  };
+
+  // Per-person HTML
+  let personHTML = integrantes.map((name, pi) => {
+    const est = personEstado[name] || { alertas: [], nivel: 'ok' };
+    const icon = est.nivel === 'ok' ? '✅' : est.nivel === 'critica' ? '🔴' : '⚠️';
+    const statusTxt = est.nivel === 'ok' ? 'Sin alertas' : est.nivel === 'critica' ? 'Señal crítica' : 'Revisar';
+    const cardClass = est.nivel === 'ok' ? 'clean' : est.nivel === 'critica' ? 'critical' : 'has-alerts';
+    const hasDetail = est.alertas.length > 0;
+
+    let flagsHTML = '';
+    if (hasDetail) {
+      flagsHTML = est.alertas.map(a => {
+        const dimColor = a.val === 'no' ? 'red' : 'amber';
+        const flagIcon = a.val === 'no' ? '🔴' : '⚠️';
+        const respTxt  = a.val === 'no' ? 'No — nadie' : 'Parcial';
+        return `<div class="vu-flag">
+          <div class="vu-flag-icon">${flagIcon}</div>
+          <div>
+            <div class="vu-flag-dim ${dimColor}">${a.pregunta.dim} · ${respTxt}</div>
+            <div class="vu-flag-q">${a.pregunta.id.toUpperCase()}: ${a.pregunta.texto}</div>
+            ${a.comentario ? `<div class="vu-flag-comment">"${a.comentario}"</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    return `<div class="vu-person ${cardClass}">
+      <div class="vu-person-head" onclick="toggleVuPerson(${pi})">
+        <div class="vu-person-left">
+          <div class="vu-person-icon">${icon}</div>
+          <div>
+            <div class="vu-person-name">${shortN(name)}</div>
+            <div class="vu-person-status">${statusTxt}${est.alertas.length > 0 ? ' · ' + est.alertas.length + ' hallazgo(s)' : ''}</div>
+          </div>
+        </div>
+        ${hasDetail ? `<div class="vu-person-chev" id="vu-chev-${pi}">▼</div>` : ''}
+      </div>
+      ${hasDetail ? `<div class="vu-person-detail" id="vu-det-${pi}">${flagsHTML}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // ── Notas del CE ──
   const urgencia    = vg('nota_urgencia').toUpperCase() === 'SÍ';
   const interaccion = vg('nota_interaccion').toUpperCase() === 'SÍ';
   const comentarios = vg('comentarios');
 
-  let obsHTML = '';
+  let notasHTML;
   if (urgencia || interaccion) {
-    obsHTML = `<div class="obs-card">
-      <div class="obs-label">NOTAS DEL CE</div>
-      ${urgencia ? '<div>⚡ Se detectó urgencia inusual por cerrar</div>' : ''}
-      ${interaccion ? '<div>🔍 Interacción no natural entre integrantes</div>' : ''}
+    notasHTML = `<div class="vu-notas-card warn">
+      <div class="vu-notas-title">⚡ Señales adicionales detectadas</div>
+      <div class="vu-notas-sub">El CE marcó las siguientes observaciones conductuales:</div>
+      ${urgencia ? `<div class="vu-notas-flag">⏱ Urgencia inusual por cerrar</div>` : ''}
+      ${interaccion ? `<div class="vu-notas-flag">🔍 Interacción no natural entre integrantes</div>` : ''}
     </div>`;
   } else {
-    obsHTML = `<div class="obs-card ok"><div class="obs-label">NOTAS DEL CE</div>Sin alertas conductuales detectadas</div>`;
-  }
-
-  let comHTML = '';
-  if (comentarios) {
-    comHTML = `<div style="padding:0 18px 14px;font-size:13px;color:var(--text2);">
-      <span style="font-weight:700;color:var(--text);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Comentarios CE:</span><br/>
-      "${comentarios}"
+    notasHTML = `<div class="vu-notas-card ok">
+      <div class="vu-notas-title">📝 Sin señales adicionales</div>
+      <div class="vu-notas-sub">El CE no marcó urgencia ni interacción no natural.</div>
     </div>`;
   }
 
+  let obsHTML = '';
+  if (comentarios) {
+    obsHTML = `<div class="vu-obs">
+      <div class="vu-obs-label">Observaciones generales</div>
+      <div class="vu-obs-text">${comentarios}</div>
+    </div>`;
+  }
+
+  // ── Assemble ──
   el.innerHTML = `
     <div class="visita-row">
       <span class="visita-label">Score de visita</span>
@@ -1232,14 +1420,39 @@ function renderVisita() {
       <span class="visita-val ${veredicto==='aprobar'?'green':'red'}">${veredicto==='aprobar'?'✅ Aprobar':'🔴 No aprobar'}</span>
     </div>
     <div class="visita-row">
-      <span class="visita-label">Fecha de visita</span>
-      <span class="visita-val" style="color:var(--text2);font-size:12px">${vg('fecha') ? new Date(vg('fecha')).toLocaleDateString('es-MX') : '—'}</span>
+      <span class="visita-label">Nivel de revisión</span>
+      <span class="visita-val ${nivelColor}">${nivelEmoji} ${nivelText}</span>
     </div>
-    <div style="padding:14px 18px 0;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Checklist por dimensión</div>
+    <div class="visita-row">
+      <span class="visita-label">Fecha de visita</span>
+      <span class="visita-val" style="color:var(--text2);font-size:12px">${vg('fecha') ? new Date(vg('fecha')).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}) : '—'}</span>
+    </div>
+
+    <div class="vu-section-label">Checklist por dimensión</div>
     ${dimHTML}
+
+    <div class="vu-stats-row">
+      <div class="vu-stat green"><div class="vu-stat-num green">${cleanCount}</div><div class="vu-stat-label">✅ Sin alertas</div></div>
+      <div class="vu-stat amber"><div class="vu-stat-num amber">${alertCount}</div><div class="vu-stat-label">⚠️ Revisar</div></div>
+      <div class="vu-stat red"><div class="vu-stat-num red">${critCount}</div><div class="vu-stat-label">🔴 Señal crítica</div></div>
+    </div>
+
+    <div class="vu-section-label">Integrantes — resultado por persona</div>
+    ${personHTML}
+
+    <div class="vu-section-label">Notas del CE para CS</div>
+    ${notasHTML}
     ${obsHTML}
-    ${comHTML}
   `;
+}
+
+// Toggle visita person detail
+function toggleVuPerson(idx) {
+  const det  = document.getElementById('vu-det-' + idx);
+  const chev = document.getElementById('vu-chev-' + idx);
+  if (!det) return;
+  const open = det.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
 }
 
 // ── ALERTAS ──
