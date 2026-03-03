@@ -948,7 +948,7 @@ async function buscarGrupo() {
     grupoActivo = query;
     datosGrupo  = integrantes;
 
-    // Fetch visita única (best effort — intenta por GID primero, luego por nombre)
+    // Fetch visita única (best effort — matching robusto)
     try {
       let data2;
       if (GID_VISITA) {
@@ -958,20 +958,66 @@ async function buscarGrupo() {
       }
       const vu = parseRows(data2);
       const vuHeaders = vu.headers.map(h => h.toLowerCase().trim());
-      const colGrupo  = vuHeaders.indexOf('grupo');
-      const matched   = vu.rows.filter(r => (r[colGrupo]||'').trim().toUpperCase() === query);
+      
+      console.log('[Revisión] Visita_Unica headers:', vuHeaders);
+      console.log('[Revisión] Visita_Unica total rows:', vu.rows.length);
+      if (vu.rows.length > 0) console.log('[Revisión] Primera fila ejemplo:', vu.rows[0].slice(0, 8));
+
+      // Buscar columna "grupo" — intentar varios nombres posibles
+      let colGrupo = -1;
+      const posibles = ['grupo', 'grupo_nombre', 'nombre_grupo', 'group', 'nombre del grupo'];
+      for (const nombre of posibles) {
+        const idx = vuHeaders.indexOf(nombre);
+        if (idx !== -1) { colGrupo = idx; break; }
+      }
+      // Fallback: columna B (índice 1) que es donde está según el xlsx
+      if (colGrupo === -1) {
+        colGrupo = 1;
+        console.log('[Revisión] Header "grupo" no encontrado por nombre, usando columna B (índice 1) como fallback');
+      } else {
+        console.log('[Revisión] Columna grupo encontrada en índice:', colGrupo, '=', vuHeaders[colGrupo]);
+      }
+
+      // Buscar coincidencia
+      let matched = vu.rows.filter(r => (r[colGrupo]||'').trim().toUpperCase() === query);
+
+      // Si no encontró, buscar en TODAS las columnas como último recurso
+      if (matched.length === 0) {
+        console.log('[Revisión] No match en columna', colGrupo, '— buscando en TODAS las columnas...');
+        const allGruposCol = [...new Set(vu.rows.map(r => (r[colGrupo]||'').trim().toUpperCase()))].filter(Boolean);
+        console.log('[Revisión] Valores en columna', colGrupo, ':', allGruposCol.join(', '));
+        
+        for (let ci = 0; ci < vuHeaders.length && matched.length === 0; ci++) {
+          const found = vu.rows.filter(r => (r[ci]||'').trim().toUpperCase() === query);
+          if (found.length > 0) {
+            matched = found;
+            console.log('[Revisión] ✅ Match encontrado en columna', ci, '(' + vuHeaders[ci] + ')');
+            // Reasignar colGrupo para el futuro
+            colGrupo = ci;
+            break;
+          }
+        }
+      }
+
       if (matched.length > 0) {
         const last = matched[matched.length - 1]; // latest
         visitaData = {};
         vuHeaders.forEach((h, i) => { visitaData[h] = last[i] || ''; });
+        // También guardar por índice por si los headers son genéricos (A, B, C...)
+        visitaData._raw = last;
+        console.log('[Revisión] ✅ Visita Única encontrada:', JSON.stringify(visitaData).substring(0, 200));
       } else {
         visitaData = null;
-        console.log('[Revisión] Visita Única: grupo no encontrado en datos. Grupos disponibles:', 
-          [...new Set(vu.rows.map(r => (r[colGrupo]||'').trim().toUpperCase()))].join(', '));
+        console.warn('[Revisión] ❌ Grupo "' + query + '" NO encontrado en Visita_Unica.');
+        console.log('[Revisión] Todos los valores únicos de todas las columnas:');
+        for (let ci = 0; ci < Math.min(vuHeaders.length, 7); ci++) {
+          const vals = [...new Set(vu.rows.map(r => (r[ci]||'').trim()).filter(Boolean))];
+          console.log('  Col', ci, '(' + vuHeaders[ci] + '):', vals.join(', '));
+        }
       }
     } catch(e) {
       visitaData = null;
-      console.warn('[Revisión] Error al cargar Visita Única:', e.message, '— Si ves "Sheet error", necesitas poner el GID numérico de la pestaña Visita_Unica en la variable GID_VISITA.');
+      console.warn('[Revisión] Error al cargar Visita Única:', e.message);
     }
 
     renderExpediente();
@@ -1003,6 +1049,39 @@ function volverBusqueda() {
 // ═══════════════════════════════════════════
 // RENDER EXPEDIENTE
 // ═══════════════════════════════════════════
+
+// Mapa de respaldo por índice de columna de Visita_Unica (según el xlsx)
+const VU_INDEX_MAP = {
+  0:'fecha', 1:'grupo', 2:'integrantes', 3:'veredicto',
+  4:'nota_urgencia', 5:'nota_interaccion', 6:'comentarios',
+  7:'v1', 8:'v1_afectadas', 9:'v1_comentario',
+  10:'v2', 11:'v2_afectadas', 12:'v2_comentario',
+  13:'v3', 14:'v3_afectadas', 15:'v3_comentario',
+  16:'v4', 17:'v4_afectadas', 18:'v4_comentario',
+  19:'v5', 20:'v5_afectadas', 21:'v5_comentario',
+  22:'v6', 23:'v6_afectadas', 24:'v6_comentario',
+  25:'v7', 26:'v7_afectadas', 27:'v7_comentario',
+  28:'v8', 29:'v8_afectadas', 30:'v8_comentario',
+  31:'v9', 32:'v9_afectadas', 33:'v9_comentario',
+  34:'v10', 35:'v10_afectadas', 36:'v10_comentario',
+};
+
+// Asegurar que visitaData tenga las claves correctas
+function normalizeVisitaData() {
+  if (!visitaData || !visitaData._raw) return;
+  const raw = visitaData._raw;
+  // Si las claves principales ya existen por nombre, no hacer nada
+  if (visitaData.veredicto && visitaData.v1) return;
+  // De lo contrario, reconstruir desde índices
+  console.log('[Revisión] Reconstruyendo visitaData desde índices de columna...');
+  for (const [idx, key] of Object.entries(VU_INDEX_MAP)) {
+    if (!visitaData[key] && raw[parseInt(idx)]) {
+      visitaData[key] = raw[parseInt(idx)];
+    }
+  }
+  console.log('[Revisión] visitaData normalizado:', JSON.stringify(visitaData).substring(0, 300));
+}
+
 function renderExpediente() {
   const rows = datosGrupo;
   const n = rows.length;
@@ -1053,6 +1132,7 @@ function renderExpediente() {
   }
 
   // Render sections
+  normalizeVisitaData();
   renderVisita();
   renderAlertas(rows);
   renderCapacidadPago(rows);
@@ -1077,14 +1157,19 @@ function renderVisita() {
   }
 
   const vd = visitaData;
-  const veredicto = vd.veredicto || 'pendiente';
+  // Safe accessor — busca por nombre de key, luego por key en minúsculas
+  const vg = (key) => {
+    const k = key.toLowerCase();
+    return vd[k] || vd[key] || '';
+  };
+  const veredicto = vg('veredicto') || 'pendiente';
 
   // Compute score from V1-V10
   const vIds = ['v1','v2','v3','v4','v5','v6','v7','v8','v9','v10'];
   let pts = 0, maxPts = 0;
   vIds.forEach(id => {
-    const val = (vd[id]||'').toLowerCase();
-    if (val === 'noapl') return;
+    const val = vg(id).toLowerCase();
+    if (!val || val === 'noapl') return;
     maxPts += 10;
     if (val === 'si') pts += 10;
     else if (val === 'parcial') pts += 5;
@@ -1107,16 +1192,16 @@ function renderVisita() {
   ];
 
   let dimHTML = dims.map(d => {
-    const allSi = d.ids.every(id => (vd[id]||'').toLowerCase() === 'si' || (vd[id]||'').toLowerCase() === 'noapl');
-    const anyNo = d.ids.some(id => (vd[id]||'').toLowerCase() === 'no');
+    const allSi = d.ids.every(id => vg(id).toLowerCase() === 'si' || vg(id).toLowerCase() === 'noapl');
+    const anyNo = d.ids.some(id => vg(id).toLowerCase() === 'no');
     const icon  = anyNo ? '⚠️' : allSi ? '✅' : '⚠️';
     return `<div class="dim-row"><span class="dim-icon">${icon}</span>${d.label}</div>`;
   }).join('');
 
   // Notas
-  const urgencia    = (vd.nota_urgencia||'').toUpperCase() === 'SÍ';
-  const interaccion = (vd.nota_interaccion||'').toUpperCase() === 'SÍ';
-  const comentarios = vd.comentarios || '';
+  const urgencia    = vg('nota_urgencia').toUpperCase() === 'SÍ';
+  const interaccion = vg('nota_interaccion').toUpperCase() === 'SÍ';
+  const comentarios = vg('comentarios');
 
   let obsHTML = '';
   if (urgencia || interaccion) {
@@ -1148,7 +1233,7 @@ function renderVisita() {
     </div>
     <div class="visita-row">
       <span class="visita-label">Fecha de visita</span>
-      <span class="visita-val" style="color:var(--text2);font-size:12px">${vd.fecha ? new Date(vd.fecha).toLocaleDateString('es-MX') : '—'}</span>
+      <span class="visita-val" style="color:var(--text2);font-size:12px">${vg('fecha') ? new Date(vg('fecha')).toLocaleDateString('es-MX') : '—'}</span>
     </div>
     <div style="padding:14px 18px 0;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Checklist por dimensión</div>
     ${dimHTML}
