@@ -777,6 +777,8 @@ body {
 // ═══════════════════════════════════════════
 const SHEET_ID  = '1kC89wVcE-6G96Y6WCEDjElAdLWbKwL_SaqHQDR8I7iY';
 const GID_PROSPECTOS    = '1077826375';
+// ↓↓↓ GID de la pestaña Visita_Unica — si no funciona con nombre, pon el gid numérico aquí ↓↓↓
+const GID_VISITA        = '';  // Ej: '1234567890' — lo encuentras en la URL de tu Sheet al abrir esa pestaña
 const APPS_SCRIPT_URL   = 'https://script.google.com/macros/s/AKfycbzbodgk8AirsoBDXwo6PzpPzhM3-8B-zoEcUV3Alzw443ZBT1laKkM56kCfrGq6Iu4/exec';
 
 // Column map (auto-detected from headers)
@@ -786,37 +788,41 @@ let datosGrupo  = [];
 let visitaData  = null;
 
 // ═══════════════════════════════════════════
-// FETCH GOOGLE SHEETS (JSONP)
+// FETCH GOOGLE SHEETS (JSONP con callbacks únicas)
 // ═══════════════════════════════════════════
 let _fetchId = 0;
 function fetchGviz(gid, sheetName) {
   return new Promise((resolve, reject) => {
     const id = ++_fetchId;
-    if (!window.google) window.google = {};
-    if (!window.google.visualization) window.google.visualization = {};
-    if (!window.google.visualization.Query) window.google.visualization.Query = {};
+    const cbName = '_gviz_cb_' + id + '_' + Date.now();
 
-    window.google.visualization.Query.setResponse = function(data) {
+    // Cada petición tiene su propia callback global — sin colisión
+    window[cbName] = function(data) {
       clearTimeout(timer);
       const s = document.getElementById('_gs_' + id);
       if (s) s.remove();
-      if (data.status === 'error') { reject(new Error('Sheet error')); return; }
+      delete window[cbName]; // limpiar
+      if (data.status === 'error') {
+        reject(new Error(data.errors?.[0]?.detailed_message || 'Sheet error'));
+        return;
+      }
       try { resolve(data); } catch(e) { reject(e); }
     };
 
-    let url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    let url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cbName}`;
     if (gid) url += `&gid=${gid}`;
     else if (sheetName) url += `&sheet=${encodeURIComponent(sheetName)}`;
 
     const script = document.createElement('script');
     script.id  = '_gs_' + id;
     script.src = url;
-    script.onerror = () => { clearTimeout(timer); reject(new Error('Network error')); };
+    script.onerror = () => { clearTimeout(timer); delete window[cbName]; reject(new Error('Network error')); };
     document.head.appendChild(script);
 
     const timer = setTimeout(() => {
       const s = document.getElementById('_gs_' + id);
       if (s) s.remove();
+      delete window[cbName];
       reject(new Error('Timeout'));
     }, 15000);
   });
@@ -942,9 +948,14 @@ async function buscarGrupo() {
     grupoActivo = query;
     datosGrupo  = integrantes;
 
-    // Fetch visita única (best effort)
+    // Fetch visita única (best effort — intenta por GID primero, luego por nombre)
     try {
-      const data2 = await fetchGviz(null, 'Visita_Unica');
+      let data2;
+      if (GID_VISITA) {
+        data2 = await fetchGviz(GID_VISITA);
+      } else {
+        data2 = await fetchGviz(null, 'Visita_Unica');
+      }
       const vu = parseRows(data2);
       const vuHeaders = vu.headers.map(h => h.toLowerCase().trim());
       const colGrupo  = vuHeaders.indexOf('grupo');
@@ -955,9 +966,12 @@ async function buscarGrupo() {
         vuHeaders.forEach((h, i) => { visitaData[h] = last[i] || ''; });
       } else {
         visitaData = null;
+        console.log('[Revisión] Visita Única: grupo no encontrado en datos. Grupos disponibles:', 
+          [...new Set(vu.rows.map(r => (r[colGrupo]||'').trim().toUpperCase()))].join(', '));
       }
     } catch(e) {
       visitaData = null;
+      console.warn('[Revisión] Error al cargar Visita Única:', e.message, '— Si ves "Sheet error", necesitas poner el GID numérico de la pestaña Visita_Unica en la variable GID_VISITA.');
     }
 
     renderExpediente();
@@ -1051,7 +1065,12 @@ function renderVisita() {
   const badge = document.getElementById('badge-visita');
 
   if (!visitaData) {
-    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">ℹ️ No se encontró registro de Visita Única para este grupo.</div>';
+    el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
+      <div style="font-size:24px;margin-bottom:8px;">ℹ️</div>
+      No se encontró registro de Visita Única para este grupo.<br/>
+      <span style="font-size:11px;margin-top:6px;display:block;">Si hay datos en la pestaña Visita_Unica, abre la consola del navegador (F12) para ver el diagnóstico.<br/>
+      Es posible que necesites configurar el GID numérico de la pestaña.</span>
+    </div>`;
     badge.textContent = 'Sin datos';
     badge.style.background = '#F3F4F6'; badge.style.color = '#6B7280';
     return;
