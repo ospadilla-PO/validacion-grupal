@@ -1162,6 +1162,8 @@ function renderExpediente() {
   const scores = rows.map(r => num(r,'cdc_score_post') || num(r,'ipp_score')).filter(x => x > 0);
   const avgScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
 
+  window._avgScore = avgScore;
+
   document.getElementById('exp-nombre').textContent = toTitle(grupoActivo);
   document.getElementById('exp-meta').textContent   = `${n} integrantes · Expediente completo`;
 
@@ -1177,6 +1179,8 @@ function renderExpediente() {
   const gc = { A:0, B:0, C:0, D:0 };
   rows.forEach(r => { const g = v(r,'cdc_grado_final').toUpperCase(); if(gc[g]!==undefined) gc[g]++; });
 
+  window._gradoCounts = gc;
+  
   document.getElementById('grado-row').innerHTML =
     Object.entries(gc).filter(([,n])=>n>0)
       .map(([g,n])=>`<span class="grado-pill ${pillClass(g)}">${g} · ${n}</span>`).join('');
@@ -1774,6 +1778,15 @@ function confirmar(type) {
 
   // Build row
   const now = new Date().toISOString();
+  // Detalle individual: nombre | score_post_buro | grado_final
+  const detalleIndividual = datosGrupo.map(r => {
+    const nombre = fullName(r);
+    const scorePost = num(r,'cdc_score_post') || num(r,'ipp_score');
+    const grado = v(r,'cdc_grado_final').toUpperCase() || v(r,'ipp_grado').toUpperCase() || '—';
+    return nombre + ':' + scorePost + '(' + grado + ')';
+  }).join(' | ');
+
+  const gc = window._gradoCounts || {};
   const row = {
     tipo: 'revision_cs',
     fecha: now,
@@ -1781,6 +1794,12 @@ function confirmar(type) {
     accion: type === 'aprobar' ? 'APROBADO' : 'SOLICITAR_REVISION',
     comentarios_cs: comment,
     integrantes: datosGrupo.length,
+    promedio_ipp: window._avgScore || 0,
+    grados_A: gc.A || 0,
+    grados_B: gc.B || 0,
+    grados_C: gc.C || 0,
+    grados_D: gc.D || 0,
+    detalle_individual: detalleIndividual,
   };
 
   // Guardar via Apps Script
