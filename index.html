@@ -958,6 +958,9 @@ function buildColMap(headers) {
   COL.ant_negocio      = f('antiguedad_negocio');
   COL.ubicacion_neg    = f('ubicacion_negocio');
   COL.cdc_total_cons   = f('cdc_total_consultas_12m');
+  // Columna AL (índice 37) — Cuentas activas
+  const alIdx = f('cdc_cuentas_activas', 'cuentas_activas', 'cuentas activas');
+  COL.cdc_cuentas_activas = alIdx !== -1 ? alIdx : 37;
 }
 
 // ═══════════════════════════════════════════
@@ -1473,7 +1476,7 @@ function renderAlertas(rows) {
     html += `<div class="al-item"><div class="al-head"><div class="al-name">Señales de endeudamiento</div><div class="al-count">${combined.length}/${n}</div></div>
       <div class="al-desc">${combined.length} integrante(s) con deuda &gt; $25,000 o 3+ cuentas con deuda &gt; $15,000</div>
       <table class="al-table"><tr><th>Integrante</th><th>Cuentas activas</th><th>Deuda activa</th></tr>
-      ${combined.map(r=>`<tr><td>${fullName(r)}</td><td>${num(r,'cdc_total_cuentas')||'—'}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
+      ${combined.map(r=>`<tr><td>${fullName(r)}</td><td>${num(r,'cdc_cuentas_activas')||'—'}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
   } else {
     html += `<div class="al-item"><div class="al-head"><div class="al-name">Señales de endeudamiento</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Sin señales de sobreendeudamiento</div></div>`;
   }
