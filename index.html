@@ -1464,28 +1464,18 @@ function renderAlertas(rows) {
   const n = rows.length;
   let html = '', activas = 0;
 
-  // R1: Deuda > $25K
+  // R1+R2 combinados: Señales de endeudamiento (deuda > $25K ó 3+ cuentas con deuda > $15K)
   const r1 = rows.filter(r => num(r,'cdc_saldo_total') > 25000);
-  if (r1.length > 0) {
-    activas++;
-    html += `<div class="al-item"><div class="al-head"><div class="al-name">Deuda individual alta</div><div class="al-count">${r1.length}/${n}</div></div>
-      <div class="al-desc">${r1.length} integrante(s) con deuda total &gt; $25,000</div>
-      <table class="al-table"><tr><th>Integrante</th><th>Deuda</th></tr>
-      ${r1.map(r=>`<tr><td>${fullName(r)}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
-  } else {
-    html += `<div class="al-item"><div class="al-head"><div class="al-name">Deuda individual alta</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Ningún integrante supera $25,000</div></div>`;
-  }
-
-  // R2: 3+ instituciones con deuda > $15K
   const r2 = rows.filter(r => num(r,'cdc_total_cuentas') >= 3 && num(r,'cdc_saldo_total') > 15000);
-  if (r2.length > 0) {
+  const combined = [...new Map([...r1, ...r2].map(r => [fullName(r), r])).values()];
+  if (combined.length > 0) {
     activas++;
-    html += `<div class="al-item"><div class="al-head"><div class="al-name">Múltiples instituciones</div><div class="al-count">${r2.length}/${n}</div></div>
-      <div class="al-desc">${r2.length} integrante(s) con 3+ cuentas y deuda &gt; $15K</div>
-      <table class="al-table"><tr><th>Integrante</th><th>Ctas</th><th>Deuda</th></tr>
-      ${r2.map(r=>`<tr><td>${fullName(r)}</td><td>${num(r,'cdc_total_cuentas')}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Señales de endeudamiento</div><div class="al-count">${combined.length}/${n}</div></div>
+      <div class="al-desc">${combined.length} integrante(s) con deuda &gt; $25,000 o 3+ cuentas con deuda &gt; $15,000</div>
+      <table class="al-table"><tr><th>Integrante</th><th>Cuentas activas</th><th>Deuda activa</th></tr>
+      ${combined.map(r=>`<tr><td>${fullName(r)}</td><td>${num(r,'cdc_total_cuentas')||'—'}</td><td>${fmt(num(r,'cdc_saldo_total'))}</td></tr>`).join('')}</table></div>`;
   } else {
-    html += `<div class="al-item"><div class="al-head"><div class="al-name">Múltiples instituciones</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Sin acumulación de deuda multi-institucional</div></div>`;
+    html += `<div class="al-item"><div class="al-head"><div class="al-name">Señales de endeudamiento</div><div class="al-count">0/${n}</div></div><div class="al-ok">✅ Sin señales de sobreendeudamiento</div></div>`;
   }
 
   // R3: Familiares
